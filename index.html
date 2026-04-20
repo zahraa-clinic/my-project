@@ -6,8 +6,8 @@
     <title>مقياس بيك للاكتئاب (BDI-II) - النسخة الأكاديمية</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        /* التزام تام بنفس التصميم والألوان الأصلية */
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
         body { font-family: 'Cairo', sans-serif; background: linear-gradient(145deg, #cfe9cf 0%, #a7c5a3 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .app-container { max-width: 1000px; width: 100%; background: #fef7e8; border-radius: 48px; box-shadow: 0 25px 45px rgba(60, 40, 20, 0.25); overflow: hidden; border: 1px solid #d9b48b; }
@@ -25,13 +25,14 @@
         .btn { background: #6f8f5e; border: none; padding: 14px 35px; border-radius: 50px; font-weight: bold; color: white; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 0 #3e5a2e; transition: 0.2s; }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #3e5a2e; }
         .survey-grid { margin: 20px 0; max-height: 60vh; overflow-y: auto; padding: 15px; scrollbar-width: thin; scrollbar-color: #6f8f5e #fef7e8; }
-        .question-item { background: #ffffff; border-radius: 28px; padding: 25px; border-right: 6px solid #b8cfaa; box-shadow: 0 5px 12px rgba(0,0,0,0.03); margin-bottom: 40px; scroll-margin-top: 20px; }
+        .question-item { background: #ffffff; border-radius: 28px; padding: 25px; border-right: 6px solid #b8cfaa; box-shadow: 0 5px 12px rgba(0,0,0,0.03); margin-bottom: 40px; }
         .options { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .option { display: flex; align-items: center; gap: 10px; background: #f9efdf; padding: 12px 20px; border-radius: 50px; cursor: pointer; transition: 0.2s; font-size: 0.95rem; text-align: right; border: 1px solid transparent; }
         .option:hover { background: #e9d9c5; }
         .option.selected { background: #6f8f5e; color: white; border-color: #3e5a2e; }
         .option input { display: none; }
         .result-card { background: #e6d5bd; border-radius: 42px; padding: 35px; text-align: center; border: 1px solid #cbb386; }
+        #qrcode { background: white; padding: 15px; border-radius: 15px; width: fit-content; margin: 20px auto; border: 2px solid #5a3e2b; }
         .db-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 15px; overflow: hidden; }
         .db-table th, .db-table td { padding: 12px; border: 1px solid #e2caac; text-align: center; font-size: 0.9rem; }
         .db-table th { background: #5a3e2b; color: white; }
@@ -77,7 +78,7 @@
 
     <div id="screen3" class="screen">
         <div id="resultDisplay"></div>
-        <div style="text-align: center; margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+        <div id="qrcode"></div> <div style="text-align: center; margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
             <button class="btn" onclick="location.reload()">فحص جديد</button>
             <button class="btn" style="background: #5a3e2b;" onclick="showLogs()">عرض السجل العام</button>
         </div>
@@ -88,13 +89,7 @@
         <div style="overflow-x: auto;">
             <table class="db-table" id="logsTable">
                 <thead>
-                    <tr>
-                        <th>التاريخ</th>
-                        <th>الاسم</th>
-                        <th>العمر</th>
-                        <th>الدرجة</th>
-                        <th>التصنيف</th>
-                    </tr>
+                    <tr><th>التاريخ</th><th>الاسم</th><th>العمر</th><th>الدرجة</th><th>التصنيف</th></tr>
                 </thead>
                 <tbody id="logsBody"></tbody>
             </table>
@@ -105,7 +100,7 @@
         </div>
     </div>
 
-    <footer>نظام أكاديمي متخصص للتقييم النفسي - يستند إلى معايير BDI-II</footer>
+    <footer>نظام أكاديمي متخصص للتقييم النفسي - BDI-II</footer>
 </div>
 
 <script>
@@ -130,8 +125,7 @@
         { q: "تغير الشهية", options: ["لم يتغير شيء في شهيتي.", "شهيتي أقل/أكثر من المعتاد بقليل.", "شهيتي أقل/أكثر من المعتاد بكثير.", "ليس لدي شهية إطلاقاً أو أريد الأكل طوال الوقت."] },
         { q: "صعوبة التركيز", options: ["أستطيع التركيز كالمعتاد.", "لا أستطيع التركيز كالمعتاد.", "من الصعب أن أركز في أي شيء لفترة طويلة.", "لا أستطيع التركيز في أي شيء."] },
         { q: "التعب والإجهاد", options: ["لست متعباً أكثر من المعتاد.", "أشعر بالتعب أسرع من المعتاد.", "أنا متعب جداً من القيام بأشياء بسيطة.", "أنا متعب جداً لدرجة لا أستطيع القيام بأي شيء."] },
-        { q: "فقدان الاهتمام بالجنس", options: ["لم أفقد الاهتمام بالجنس.", "أنا أقل اهتماماً بالجنس عما كنت سابقاً.", "أنا أقل اهتماماً بالجنس جداً الآن.", "فقدت الاهتمام بالجنس تماماً."] }
-    ];
+        { q: "الانسحاب والاهتمام بالآخرين", options: ["لم أفقد اهتمامي بالناس أو بالأنشطة.", "أنا أقل اهتماماً بالآخرين أو بالأشياء عما كنت سابقاً.", "فقدت معظم اهتمامي بالآخرين أو بالأشياء.", "من الصعب أن أهتم بأي شيء إطلاقاً."] }
 
     let patientData = { name: "", age: "" };
 
@@ -144,7 +138,7 @@
         const container = document.getElementById('questionsContainer');
         container.innerHTML = questions.map((item, i) => `
             <div class="question-item" id="q-box-${i}">
-                <div style="font-weight:700; color:#5a3e2b; font-size:1.1rem;">${i+1}. ${item.q}</div>
+                <div style="font-weight:700; color:#5a3e2b;">${i+1}. ${item.q}</div>
                 <div class="options">
                     ${item.options.map((opt, v) => `
                         <label class="option" onclick="selectOption(this, ${i})">
@@ -160,19 +154,14 @@
         el.parentElement.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
         el.classList.add('selected');
         document.getElementById('answeredCount').innerText = `${document.querySelectorAll('input:checked').length} / 21 تم الإجابة`;
-        const next = document.getElementById(`q-box-${index + 1}`);
-        if(next) setTimeout(() => next.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
     }
 
     document.getElementById('startSurveyBtn').onclick = () => {
-        const nameInput = document.getElementById('patientName').value.trim();
-        const ageInput = document.getElementById('patientAge').value;
-        
-        if(!nameInput || !ageInput) return alert("يرجى إكمال بيانات المريض أولاً");
-        
-        patientData.name = nameInput;
-        patientData.age = ageInput;
-        document.getElementById('pDisplay').innerText = `المريض: ${patientData.name}`;
+        const name = document.getElementById('patientName').value.trim();
+        const age = document.getElementById('patientAge').value;
+        if(!name || !age) return alert("يرجى إكمال بيانات المريض");
+        patientData = { name, age };
+        document.getElementById('pDisplay').innerText = `المريض: ${name}`;
         showScreen('screen2');
         generateQuestions();
     };
@@ -180,85 +169,47 @@
     document.getElementById('showResultBtn').onclick = () => {
         let score = 0;
         const checked = document.querySelectorAll('input:checked');
-        if(checked.length < 21) return alert("يرجى الإجابة على جميع البنود (21 بنداً) لضمان دقة التشخيص الأكاديمي.");
+        if(checked.length < 21) return alert("يرجى الإجابة على جميع الأسئلة");
         
         checked.forEach(i => score += parseInt(i.value));
+        let level = score <= 13 ? "اكتئاب بسيط جداً" : score <= 19 ? "اكتئاب خفيف" : score <= 28 ? "اكتئاب متوسط" : "اكتئاب شديد";
 
-        let level = "", color = "", advice = "";
-        
-        if (score <= 13) { 
-            level = "اكتئاب في حدوده الدنيا (Minimal)"; 
-            color = "#6f8f5e"; 
-            advice = "تُظهر النتائج استقراراً نفسياً ضمن الحدود الطبيعية. ننصح بالاستمرار في ممارسة الهوايات والحفاظ على التواصل الاجتماعي الصحي."; 
-        }
-        else if (score <= 19) { 
-            level = "اكتئاب خفيف (Mild)"; 
-            color = "#b4a03a"; 
-            advice = "هناك مؤشرات بسيطة على انخفاض المزاج. ننصح بتنظيم النوم، ممارسة الرياضة، والتحدث مع صديق مقرب أو مستشار تربوي."; 
-        }
-        else if (score <= 28) { 
-            level = "اكتئاب متوسط (Moderate)"; 
-            color = "#d9822b"; 
-            advice = "توجد أعراض اكتئاب واضحة قد تؤثر على جودة حياتك اليومية. من الضروري مراجعة أخصائي نفسي لتقديم الدعم السلوكي المعرفي المناسب."; 
-        }
-        else { 
-            level = "اكتئاب شديد (Severe)"; 
-            color = "#a53f2b"; 
-            advice = "درجتك تشير إلى معاناة نفسية كبيرة. يرجى التوجه فوراً لزيارة طبيب نفسي مختص لتقييم الحالة سريرياً ووضع خطة علاجية عاجلة."; 
-        }
-
-        // حفظ البيانات في قاعدة البيانات المحلية
-        saveToDB(patientData.name, patientData.age, score, level);
-
+        // عرض النتيجة
         document.getElementById('resultDisplay').innerHTML = `
-            <div class="result-card" style="border-top: 10px solid ${color}">
-                <p style="color:#5a3e2b; font-weight:bold;">تقرير المريض: ${patientData.name}</p>
-                <h2>النتيجة النهائية للمقياس</h2>
-                <div style="font-size:2.8rem; font-weight:800; color:${color}; margin:15px 0;">${score}</div>
-                <div style="font-size:1.4rem; font-weight:bold; color:#5a3e2b;">التصنيف الأكاديمي: ${level}</div>
-                <div style="margin-top:20px; background:white; padding:20px; border-radius:20px; border:1px dashed ${color}; text-align:right;">
-                    <strong style="color:${color}"><i class="fas fa-hand-holding-heart"></i> نصيحة المريض:</strong>
-                    <p style="margin-top:10px; line-height:1.6; color:#444;">${advice}</p>
-                </div>
+            <div class="result-card">
+                <h2>تقرير: ${patientData.name}</h2>
+                <div style="font-size:3rem; font-weight:800; color:#5a3e2b;">${score}</div>
+                <h3>التصنيف: ${level}</h3>
             </div>`;
+
+        // توليد الباركود
+        document.getElementById("qrcode").innerHTML = ""; // مسح القديم
+        new QRCode(document.getElementById("qrcode"), {
+            text: `تقرير بيك - الاسم: ${patientData.name}, الدرجة: ${score}, الحالة: ${level}`,
+            width: 128,
+            height: 128
+        });
+
+        saveToDB(patientData.name, patientData.age, score, level);
         showScreen('screen3');
     };
 
-    // وظائف قاعدة البيانات
-    function saveToDB(name, age, score, level) {
+    function saveToDB(n, a, s, l) {
         const logs = JSON.parse(localStorage.getItem('bdi_logs') || "[]");
-        const entry = {
-            date: new Date().toLocaleString('ar-EG'),
-            name: name,
-            age: age,
-            score: score,
-            level: level
-        };
-        logs.push(entry);
+        logs.push({ date: new Date().toLocaleDateString('ar-EG'), name: n, age: a, score: s, level: l });
         localStorage.setItem('bdi_logs', JSON.stringify(logs));
     }
 
     function showLogs() {
         const logs = JSON.parse(localStorage.getItem('bdi_logs') || "[]");
-        const tbody = document.getElementById('logsBody');
-        tbody.innerHTML = logs.map(log => `
-            <tr>
-                <td>${log.date}</td>
-                <td>${log.name}</td>
-                <td>${log.age}</td>
-                <td>${log.score}</td>
-                <td>${log.level}</td>
-            </tr>
+        document.getElementById('logsBody').innerHTML = logs.map(log => `
+            <tr><td>${log.date}</td><td>${log.name}</td><td>${log.age}</td><td>${log.score}</td><td>${log.level}</td></tr>
         `).join('');
-        if(logs.length === 0) tbody.innerHTML = "<tr><td colspan='5'>لا توجد بيانات مسجلة حالياً</td></tr>";
         showScreen('screen4');
     }
 
     function clearDatabase() {
-        if(confirm("هل أنت متأكد من مسح جميع بيانات المرضى؟")) {
-            localStorage.removeItem('bdi_logs');
-            showLogs();
-        }
+        if(confirm("مسح السجل؟")) { localStorage.removeItem('bdi_logs'); showLogs(); }
     }
 </script>
 </body>
